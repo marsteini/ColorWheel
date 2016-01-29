@@ -1,78 +1,79 @@
-package com.moonbytes.colorwheel.ColorWheelView;
+package com.moonbytes.colorwheel;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by dasteini on 25.01.16.
+ * Created by dasteini on 26.01.16.
  */
-public class ColorWheelView extends View implements View.OnTouchListener {
+public class ColorPickerView extends SurfaceView implements Runnable, View.OnTouchListener {
+    private Canvas canvas;
+    private SurfaceHolder surfaceHolder;
+    private boolean drawing = true;
+    private int HUE_HEIGHT = 150;
     private Paint p;
-    private float stretchFactor, satStretchFactor;
+    private int width, height;
+    private float stretchFactor;
+    private float satStretchFactor;
+    private float hue = 60, saturation = 1.0f, value = 1.0f;
     private List<ColorChangeListener> colorChangeListeners;
-    final String xmlns="http://schemas.android.com/apk/res/android";
-    // Store S (saturation) and V (value) in this class
-    private float saturation = 1.0f, value = 1.0f, hue = 0.0f;
 
-    private  int HUE_HEIGHT;
+    private Thread drawThread;
 
-    int width;
-    int height;
-
-    public ColorWheelView(Context context, AttributeSet attrs) {
+    public ColorPickerView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        HUE_HEIGHT = attrs.getAttributeIntValue(xmlns,"hueHight", 70);
+        surfaceHolder = getHolder();
+        surfaceHolder.setFormat(PixelFormat.RGBA_8888);
         colorChangeListeners = new ArrayList<ColorChangeListener>();
         setOnTouchListener(this);
+        init();
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
+    public void onResumeView() {
+        drawThread = new Thread(this);
+        drawThread.start();
+    }
 
-        p = new Paint();
-        p.setAntiAlias(true);
+    private void drawHue() {
+        stretchFactor = 360.0f/width;
+        satStretchFactor = 1.0f / width;
+
+        int lineIndex = 0;
 
         width = canvas.getWidth();
         height = canvas.getHeight();
+        Log.d("View", "W/H: " + width + "/" + height);
 
-        // HueHeight
-        //HUE_HEIGHT = (int) (height * 0.2);
-
-        stretchFactor = 360.0f/width;
-        Log.d("App", "Stretching factor: "+stretchFactor + " Canvas-Size: " + width + "/" + height);
-
-        int lineIndex = 0;
 
         // Draw hue curve
         for(float i = 0; i < 360.0f; i+=stretchFactor) {
             float[] hsv = {i,1.0f,1.0f};
             p.setColor(Color.HSVToColor(hsv));
             canvas.drawLine(lineIndex, 0, lineIndex, HUE_HEIGHT, p);
-
             lineIndex++;
         }
 
-        satStretchFactor = 1.0f / width;
-
-        drawSVView(canvas);
 
     }
 
-    private void drawSVView(Canvas canvas) {
+    private void drawSVView() {
         float pSaturation = 0.0f, pValue = 0.0f;
-
         for(int x = 0; x < width; x++) {
-            for(int y = HUE_HEIGHT; y < width; y++) {
+            for(int y = HUE_HEIGHT; y < width+HUE_HEIGHT; y++) {
                 float[] hsv = {hue, pSaturation, pValue};
                 p.setColor(Color.HSVToColor(hsv));
                 canvas.drawPoint(x,y,p);
@@ -83,9 +84,7 @@ public class ColorWheelView extends View implements View.OnTouchListener {
         }
     }
 
-    public void setOnColorChangedListener(ColorChangeListener l) {
-        colorChangeListeners.add(l);
-    }
+
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -103,15 +102,48 @@ public class ColorWheelView extends View implements View.OnTouchListener {
             wMode = "Not defined";
         }
 
-        Log.d("WidthMode", wMode);
 
         setMeasuredDimension(widthSize,widthSize+HUE_HEIGHT);
     }
 
+
+    private void init() {
+        // Inititalize paint
+        p = new Paint();
+        p.setAntiAlias(false);
+
+
+
+
+
+    }
+
+    @Override
+    public void run() {
+        while(true) {
+            if(surfaceHolder.getSurface().isValid()) {
+                canvas = surfaceHolder.lockCanvas();
+
+                canvas.drawColor(Color.BLACK);
+                drawHue();
+                drawSVView();
+                surfaceHolder.unlockCanvasAndPost(canvas);
+            }
+/*
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            */
+        }
+
+
+
+    }
+
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-
-
         if(event.getY() < HUE_HEIGHT) {
             hue = event.getX() * stretchFactor;
             invalidate();
@@ -134,6 +166,4 @@ public class ColorWheelView extends View implements View.OnTouchListener {
     public interface ColorChangeListener {
         void onColorChanged(int color);
     }
-
-
 }
