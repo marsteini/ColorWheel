@@ -13,6 +13,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +32,10 @@ public class DeviceActivity extends AppCompatActivity {
     private RecyclerView deviceList;
     private DeviceDatabase deviceDb;
     private List<DeviceItem> devices;
+    private DeviceManager deviceManager;
+
+    private ProgressBar networkProgress;
+    private int dbItemCount, receivedItemCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +44,8 @@ public class DeviceActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        initUI();
         init();
-
         checkRest();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -65,54 +70,53 @@ public class DeviceActivity extends AppCompatActivity {
     }
 
     private void checkRest() {
-        DeviceManager dm = new DeviceManager(this, devices);
-        dm.checkDevices();
+        deviceManager.checkDevices();
 
-        dm.setOnDeviceCheckedListener(new DeviceManager.DeviceRestListener() {
+        deviceManager.setOnDeviceCheckedListener(new DeviceManager.DeviceRestListener() {
             @Override
             public void onDeviceChecked(DeviceItem deviceItem) {
                 Log.d("Rest", "Device: " + deviceItem.getDeviceName() + " Status: " + deviceItem.getStatus());
                 devices.add(deviceItem);
                 dAdapter = new DeviceListAdapter(getApplicationContext(), devices);
                 deviceList.setAdapter(dAdapter);
+                receivedItemCount++;
+                checkProgress();
             }
         });
         devices.clear();
     }
 
-    private void init() {
+    private void checkProgress() {
+        if(dbItemCount == receivedItemCount) networkProgress.setVisibility(View.GONE);
+    }
+
+    private void initUI() {
         deviceList = (RecyclerView) findViewById(R.id.deviceList);
+        networkProgress = (ProgressBar) findViewById(R.id.progress);
+
+    }
+
+    private void init() {
+        networkProgress.setVisibility(View.VISIBLE);
         deviceDb = new DeviceDatabase(this);
+        refreshFromDatabase();
+        deviceManager = new DeviceManager(this, devices);
 
         deviceList.addOnItemTouchListener(new RecyclerItemClickListener(getApplicationContext(), new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
-                Toast.makeText(getApplicationContext(), "Clicked on: " + position, Toast.LENGTH_SHORT).show();
                 Intent i = new Intent(getApplicationContext(), ColorPickerActivity.class);
                 startActivity(i);
             }
         }));
         deviceList.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        refreshFromDatabase();
+
     }
 
     private void refreshFromDatabase() {
         devices = deviceDb.getAllDevices();
+        dbItemCount = devices.size();
         dAdapter = new DeviceListAdapter(getApplicationContext(), devices);
         deviceList.setAdapter(dAdapter);
     }
-
-    private List<DeviceItem> getPseudoDevices() {
-        List<DeviceItem> l = new ArrayList<DeviceItem>();
-        String[][] names = { {"Steini Zimmer", "Wohnzimmer", "Bad"}, {"192.168.0.12", "192.168.0.23", "192.168.0.3"}};
-        for(int i = 0; i < 3; i++) {
-            DeviceItem d = new DeviceItem();
-            d.setDeviceName(names[0][i]);
-            d.setIpAddress(names[1][i]);
-            l.add(d);
-        }
-        return l;
-    }
-
-
 }

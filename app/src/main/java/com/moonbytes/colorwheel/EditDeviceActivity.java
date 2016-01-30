@@ -17,10 +17,19 @@ import android.widget.Toast;
 import com.moonbytes.colorwheel.Helper.DeviceDatabase;
 import com.moonbytes.colorwheel.Helper.DeviceItem;
 
+/**
+ * This Activity manages the adding of a new DeviceItem to the database
+ */
+
 public class EditDeviceActivity extends AppCompatActivity {
+    // Views
     private TextView ipAddress, deviceName;
     private Button cancelBtn, addBtn;
+
+    // Booleans to check if the entered IP address is valid
     private boolean ipValid = false, nameValid = false;
+
+    // Database reference
     private DeviceDatabase deviceDatabase;
 
     @Override
@@ -28,15 +37,17 @@ public class EditDeviceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_device);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
         setSupportActionBar(toolbar);
 
+        // Initialize database and UI
         initDB();
         initUI();
     }
 
     private void initDB() {
+        // Initialize device database
         deviceDatabase = new DeviceDatabase(getApplication());
-
     }
 
     private void initUI() {
@@ -44,9 +55,10 @@ public class EditDeviceActivity extends AppCompatActivity {
         deviceName = (TextView) findViewById(R.id.deviceName);
         cancelBtn = (Button) findViewById(R.id.cancelBtn);
         addBtn = (Button) findViewById(R.id.addBtn);
-
+        // By default, the add button is disabled to avoid enter empty devices
         addBtn.setActivated(false);
 
+        // Add two text changed listeners
         ipAddress.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -106,6 +118,10 @@ public class EditDeviceActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     *
+     * @return DeviceItem object generated from input text fields
+     */
     private DeviceItem getDeviceFromInput() {
         DeviceItem d = new DeviceItem();
         d.setDeviceName(deviceName.getText().toString());
@@ -113,10 +129,16 @@ public class EditDeviceActivity extends AppCompatActivity {
         return d;
     }
 
+    // Checks if we can enable the add button
     private void checkAddButton() {
         addBtn.setActivated(ipValid && nameValid);
     }
 
+    /**
+     * Checks, if an IP address has the right format, e.g. 192.168.0.1
+     * @param s IP address as String
+     * @return valid or not valid
+     */
     private boolean checkValidAddress(String s) {
         int points = 0;
         String[] parts = s.split("[.]");

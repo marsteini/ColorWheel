@@ -17,7 +17,7 @@ import com.moonbytes.colorwheel.R;
 import java.util.List;
 
 /**
- * Created by dasteini on 27.01.16.
+ * Device
  */
 public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.DeviceHolder> {
     private List<DeviceItem> devices;
@@ -68,15 +68,6 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.De
             deviceName = (TextView) itemView.findViewById(R.id.deviceName);
             deviceIp = (TextView) itemView.findViewById(R.id.deviceIP);
             deviceIcon = (ImageView) itemView.findViewById(R.id.deviceIcon);
-            /*
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    Toast.makeText(context, "OnLongClick", Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-            });
-            */
         }
     }
 }

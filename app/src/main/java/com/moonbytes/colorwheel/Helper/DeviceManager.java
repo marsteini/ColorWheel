@@ -1,7 +1,6 @@
 package com.moonbytes.colorwheel.Helper;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +12,8 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 /**
- * Created by dasteini on 29.01.16.
+ * DeviceManager has the ability to check each device from the database if its online, offline or has
+ * some other state. This class is using Retrofit 2 framework to do communicate with the REST API.
  */
 public class DeviceManager {
     private List<DeviceItem> devices;
@@ -23,7 +23,6 @@ public class DeviceManager {
     public DeviceManager(Context context, List<DeviceItem> devices) {
         this.devices = devices;
         this.context = context;
-
         restListeners = new ArrayList<DeviceRestListener>();
     }
 
@@ -39,6 +38,7 @@ public class DeviceManager {
     }
 
     public void checkDevice(final DeviceItem device) {
+        // Building the retrofit interface
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://"+device.getIpAdress())
                 .addConverterFactory(GsonConverterFactory.create())
@@ -46,6 +46,9 @@ public class DeviceManager {
         DeviceRestService deviceService = retrofit.create(DeviceRestService.class);
 
         Call<DeviceResponse> call = deviceService.getDeviceInformation();
+
+        // Do an asynchronous call to the API and notify the DeviceRestListener interface when request
+        // is done
         call.enqueue(new Callback<DeviceResponse>() {
             @Override
             public void onResponse(Response<DeviceResponse> response) {
@@ -67,6 +70,7 @@ public class DeviceManager {
         });
     }
 
+    // Notifies the activity when an device was checked
     public interface DeviceRestListener {
         void onDeviceChecked(DeviceItem deviceItem);
     }
