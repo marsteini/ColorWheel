@@ -3,6 +3,7 @@ package com.moonbytes.colorwheel.Helper;
 import android.content.Context;
 import android.media.Image;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,8 +41,14 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.De
     @Override
     public void onBindViewHolder(DeviceListAdapter.DeviceHolder holder, int position) {
         DeviceItem d = devices.get(position);
+        String status;
+        Log.d("Rest", "Status: " +d.getStatus());
+        if(d.getStatus() == DeviceItem.STATUS_OFFLINE) status = "Offline";
+        else if(d.getStatus() == DeviceItem.STATUS_ONLINE) status = "Online";
+        else status = "Unknown";
+
         holder.deviceName.setText(d.getDeviceName());
-        holder.deviceIp.setText(d.getIpAdress());
+        holder.deviceIp.setText(d.getIpAdress() +  " - " + status);
 
     }
 

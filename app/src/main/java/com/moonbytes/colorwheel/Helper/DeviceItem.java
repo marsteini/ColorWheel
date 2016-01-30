@@ -9,6 +9,9 @@ public class DeviceItem {
     private String IP_ADDRESS, DEVICE_NAME;
     private boolean POWERED_ON, AVAILABLE;
     private Color COLOR;
+    private int status = 2;
+    private long ID;
+    public static final int STATUS_OFFLINE = 0, STATUS_ONLINE = 1, STATUS_UNKNOWN = 2, STATUS_NO_IOT = 3;
 
     public long getId() {
         return ID;
@@ -18,7 +21,6 @@ public class DeviceItem {
         this.ID = ID;
     }
 
-    private long ID;
 
     public String getIpAdress() {
         return IP_ADDRESS;
@@ -58,5 +60,13 @@ public class DeviceItem {
 
     public void setColor(Color COLOR) {
         this.COLOR = COLOR;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public int getStatus() {
+        return status;
     }
 }

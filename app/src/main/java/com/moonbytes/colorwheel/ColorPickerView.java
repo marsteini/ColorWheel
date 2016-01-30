@@ -111,31 +111,21 @@ public class ColorPickerView extends SurfaceView implements Runnable, View.OnTou
         // Inititalize paint
         p = new Paint();
         p.setAntiAlias(false);
-
-
-
-
-
     }
 
     @Override
     public void run() {
-        while(true) {
+        while(drawing) {
             if(surfaceHolder.getSurface().isValid()) {
                 canvas = surfaceHolder.lockCanvas();
+                if(canvas != null) {
+                    canvas.drawColor(Color.BLACK);
+                    drawHue();
+                    drawSVView();
+                    surfaceHolder.unlockCanvasAndPost(canvas);
+                }
 
-                canvas.drawColor(Color.BLACK);
-                drawHue();
-                drawSVView();
-                surfaceHolder.unlockCanvasAndPost(canvas);
             }
-/*
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            */
         }
 
 
@@ -161,6 +151,10 @@ public class ColorPickerView extends SurfaceView implements Runnable, View.OnTou
             l.onColorChanged(color);
         }
         return true;
+    }
+
+    public void stop() {
+        drawing = false;
     }
 
     public interface ColorChangeListener {

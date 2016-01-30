@@ -20,6 +20,7 @@ import com.moonbytes.colorwheel.ColorWheelView.ColorWheelView;
 import com.moonbytes.colorwheel.Helper.DeviceDatabase;
 import com.moonbytes.colorwheel.Helper.DeviceItem;
 import com.moonbytes.colorwheel.Helper.DeviceListAdapter;
+import com.moonbytes.colorwheel.Helper.DeviceManager;
 import com.moonbytes.colorwheel.Helper.RecyclerItemClickListener;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class DeviceActivity extends AppCompatActivity {
     private DeviceListAdapter dAdapter;
     private RecyclerView deviceList;
     private DeviceDatabase deviceDb;
+    private List<DeviceItem> devices;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,8 @@ public class DeviceActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         init();
+
+        checkRest();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -60,13 +64,32 @@ public class DeviceActivity extends AppCompatActivity {
         }
     }
 
+    private void checkRest() {
+        DeviceManager dm = new DeviceManager(this, devices);
+        dm.checkDevices();
+
+        dm.setOnDeviceCheckedListener(new DeviceManager.DeviceRestListener() {
+            @Override
+            public void onDeviceChecked(DeviceItem deviceItem) {
+                Log.d("Rest", "Device: " + deviceItem.getDeviceName() + " Status: " + deviceItem.getStatus());
+                devices.add(deviceItem);
+                dAdapter = new DeviceListAdapter(getApplicationContext(), devices);
+                deviceList.setAdapter(dAdapter);
+            }
+        });
+        devices.clear();
+    }
+
     private void init() {
         deviceList = (RecyclerView) findViewById(R.id.deviceList);
+        deviceDb = new DeviceDatabase(this);
 
         deviceList.addOnItemTouchListener(new RecyclerItemClickListener(getApplicationContext(), new RecyclerItemClickListener.OnItemClickListener() {
             @Override
             public void onItemClick(View v, int position) {
                 Toast.makeText(getApplicationContext(), "Clicked on: " + position, Toast.LENGTH_SHORT).show();
+                Intent i = new Intent(getApplicationContext(), ColorPickerActivity.class);
+                startActivity(i);
             }
         }));
         deviceList.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -74,8 +97,8 @@ public class DeviceActivity extends AppCompatActivity {
     }
 
     private void refreshFromDatabase() {
-        deviceDb = new DeviceDatabase(this);
-        dAdapter = new DeviceListAdapter(getApplicationContext(), deviceDb.getAllDevices());
+        devices = deviceDb.getAllDevices();
+        dAdapter = new DeviceListAdapter(getApplicationContext(), devices);
         deviceList.setAdapter(dAdapter);
     }
 
@@ -91,31 +114,5 @@ public class DeviceActivity extends AppCompatActivity {
         return l;
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_device, menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        refreshFromDatabase();
-    }
 }
