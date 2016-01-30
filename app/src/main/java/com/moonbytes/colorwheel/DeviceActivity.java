@@ -9,6 +9,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Menu;
@@ -75,7 +76,6 @@ public class DeviceActivity extends AppCompatActivity {
         deviceManager.setOnDeviceCheckedListener(new DeviceManager.DeviceRestListener() {
             @Override
             public void onDeviceChecked(DeviceItem deviceItem) {
-                Log.d("Rest", "Device: " + deviceItem.getDeviceName() + " Status: " + deviceItem.getStatus());
                 devices.add(deviceItem);
                 dAdapter = new DeviceListAdapter(getApplicationContext(), devices);
                 deviceList.setAdapter(dAdapter);
@@ -87,10 +87,14 @@ public class DeviceActivity extends AppCompatActivity {
     }
 
     private void checkProgress() {
-        if(dbItemCount == receivedItemCount) networkProgress.setVisibility(View.GONE);
+        if(dbItemCount == receivedItemCount) {
+            networkProgress.setVisibility(View.GONE);
+            receivedItemCount = 0;
+        }
     }
 
     private void initUI() {
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
         deviceList = (RecyclerView) findViewById(R.id.deviceList);
         networkProgress = (ProgressBar) findViewById(R.id.progress);
 
@@ -118,5 +122,27 @@ public class DeviceActivity extends AppCompatActivity {
         dbItemCount = devices.size();
         dAdapter = new DeviceListAdapter(getApplicationContext(), devices);
         deviceList.setAdapter(dAdapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_device, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.refresh:
+                refreshDevices();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void refreshDevices() {
+
     }
 }

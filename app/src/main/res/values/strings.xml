@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">ColorWheel</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_edit_device">EditDeviceActivity</string>
+    <string name="title_activity_edit_device">Add new device</string>
+    <string name="back">Refresh</string>
 </resources>
