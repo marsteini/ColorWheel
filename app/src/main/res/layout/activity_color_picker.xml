@@ -10,10 +10,17 @@
     android:orientation="vertical"
     tools:context="com.moonbytes.colorwheel.ColorPickerActivity">
     <android.support.v7.widget.CardView
-        android:paddingTop="8dp"
+        android:id="@+id/colorCard"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+    </android.support.v7.widget.CardView>
+    <android.support.v7.widget.CardView
+        android:layout_marginTop="8dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <com.moonbytes.colorwheel.ColorPickerView
+
+        <com.github.danielnilsson9.colorpickerview.view.ColorPickerView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/colorPicker" />
@@ -26,6 +33,7 @@
         <Switch
             android:layout_margin="8dp"
             android:text="Power Device"
+            android:id="@+id/powerSwitch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
     </android.support.v7.widget.CardView>

@@ -1,6 +1,7 @@
 package com.moonbytes.colorwheel.Helper;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,10 +53,10 @@ public class DeviceManager {
         call.enqueue(new Callback<DeviceResponse>() {
             @Override
             public void onResponse(Response<DeviceResponse> response) {
-                if(response == null) {
+                if (response == null) {
                     device.setStatus(DeviceItem.STATUS_NO_IOT);
                 }
-                for(DeviceRestListener d : restListeners) {
+                for (DeviceRestListener d : restListeners) {
                     d.onDeviceChecked(device);
                 }
             }
@@ -63,9 +64,36 @@ public class DeviceManager {
             @Override
             public void onFailure(Throwable t) {
                 device.setStatus(DeviceItem.STATUS_OFFLINE);
-                for(DeviceRestListener l : restListeners) {
+                for (DeviceRestListener l : restListeners) {
                     l.onDeviceChecked(device);
                 }
+            }
+        });
+    }
+
+    public void updateDevice(DeviceItem device) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://"+device.getIpAdress())
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        DeviceRestService deviceService = retrofit.create(DeviceRestService.class);
+        String hexColor = device.getColor().toString();
+        int power;
+        if(device.isPoweredOn()) power = 1;
+        else power = 0;
+        Call<DeviceResponse> call = deviceService.updateDevice(hexColor, power);
+
+        Log.d("Rest", hexColor);
+
+        call.enqueue(new Callback<DeviceResponse>() {
+            @Override
+            public void onResponse(Response<DeviceResponse> response) {
+
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+
             }
         });
     }

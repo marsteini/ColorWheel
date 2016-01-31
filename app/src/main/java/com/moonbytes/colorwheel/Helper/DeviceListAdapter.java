@@ -57,7 +57,9 @@ public class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.De
         return devices.size();
     }
 
-
+    public DeviceItem getDeviceAt(int position) {
+        return devices.get(position);
+    }
 
     public class DeviceHolder extends RecyclerView.ViewHolder {
         private TextView deviceName, deviceIp;

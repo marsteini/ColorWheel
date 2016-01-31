@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -17,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by dasteini on 26.01.16.
+ * This class is replaced by ColorPickerView from
  */
 public class ColorPickerView extends SurfaceView implements Runnable, View.OnTouchListener {
     private Canvas canvas;
@@ -44,8 +45,9 @@ public class ColorPickerView extends SurfaceView implements Runnable, View.OnTou
     }
 
     public void onResumeView() {
-        drawThread = new Thread(this);
-        drawThread.start();
+        //drawThread = new Thread(this);
+        //drawThread.start();
+
     }
 
     private void drawHue() {
@@ -136,7 +138,6 @@ public class ColorPickerView extends SurfaceView implements Runnable, View.OnTou
     public boolean onTouch(View v, MotionEvent event) {
         if(event.getY() < HUE_HEIGHT) {
             hue = event.getX() * stretchFactor;
-            invalidate();
         } else {
             saturation = (event.getY() - HUE_HEIGHT)*satStretchFactor;
             value = event.getX() * satStretchFactor;
@@ -155,6 +156,25 @@ public class ColorPickerView extends SurfaceView implements Runnable, View.OnTou
 
     public void stop() {
         drawing = false;
+    }
+
+    class updateUI extends AsyncTask<Void, Void, Void> {
+
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if(surfaceHolder.getSurface().isValid()) {
+                canvas = surfaceHolder.lockCanvas();
+                if(canvas != null) {
+                    canvas.drawColor(Color.BLACK);
+                    drawHue();
+                    drawSVView();
+                    surfaceHolder.unlockCanvasAndPost(canvas);
+                }
+
+            }
+            return null;
+        }
     }
 
     public interface ColorChangeListener {

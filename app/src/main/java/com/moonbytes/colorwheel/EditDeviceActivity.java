@@ -59,7 +59,6 @@ public class EditDeviceActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayShowHomeEnabled(true);
-        actionBar.setTitle(getString(R.string.title_activity_edit_device));
 
         // Setup views
         ipAddress = (TextView) findViewById(R.id.ipAddress);
